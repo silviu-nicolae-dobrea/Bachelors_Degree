@@ -45,6 +45,11 @@ class Server:
         self.video_play_thread = threading.Thread()
         self.recive_state = 0
 
+        self.min_dec_frame = 1000
+        self.max_dec_frame = 0
+        self.med_dec_frame = 0
+        self.count_dec_frames = 0
+
     def get_ip_address(self):
         """
         Preia adresa IP a Raspberry Pi.
@@ -268,6 +273,7 @@ class Server:
                                 if elapsed_time >= 1.0:
                                     print(
                                         "Cadre decodate intr-o secunda: ", frame_count)
+                                    self.countDecFrames(frame_count)
                                     frame_count = 0
                                     start_time = time.time()
                         except Exception as e:
@@ -293,11 +299,24 @@ class Server:
 
                                     print(
                                         "Cadre decodate intr-o secunda: ", frame_count)
+                                    self.countDecFrames(frame_count)
 
                                     frame_count = 0
                                     start_time = time.time()
                         except Exception as e:
                             print(count, e)
+    
+    def countDecFrames(self, dec_frame_count):
+        
+        self.count_dec_frames += 1
+        self.med_dec_frame += dec_frame_count
+
+        if dec_frame_count < self.min_dec_frame :
+            self.min_dec_frame = dec_frame_count
+        
+        if dec_frame_count > self.max_dec_frame :
+            self.max_dec_frame = dec_frame_count
+    
 
     def video_play(self):
         """
@@ -365,6 +384,10 @@ class Server:
             #     print(e)
 
         cv2.destroyAllWindows()
+        print(f"Min : {self.min_dec_frame} FPS_decoded")
+        print(f"Max : {self.max_dec_frame} FPS_decoded")
+        media = self.med_dec_frame/ self.count_dec_frames
+        print(f"Med : {media} FPS_decoded")
 
     def video_backward(self):
         """

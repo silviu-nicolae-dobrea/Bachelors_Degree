@@ -324,6 +324,10 @@ class ClientConnection:
         self.CLIENT = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.file_in_transfer = threading.Thread()
         self.event = Event()
+        self.min_frame = 1000
+        self.max_frame = 0
+        self.med_frame = 0
+        self.count_frames = 0
 
     def start(self):
         '''
@@ -419,12 +423,17 @@ class ClientConnection:
                         if elapsed_time >= 1.0:
 
                             print("FPS : ", frame_count)
-
+                            self.countFrames(frame_count)
                             frame_count = 0
                             start_time = time.time()
                     else:
                         break
                 client_socket.close()
+                print(f"Min : {self.min_frame} FPS")
+                print(f"Max : {self.max_frame} FPS")
+                media = self.med_frame/ self.count_frames
+                print(f"Med : {media} FPS")
+
         except:
             client_socket.close()
             print(f'Connectoin close')
@@ -432,6 +441,17 @@ class ClientConnection:
         print('disconected')
         client_socket.close()
 
+    def countFrames(self, frame_count):
+        
+        self.count_frames += 1
+        self.med_frame += frame_count
+
+        if frame_count < self.min_frame :
+            self.min_frame = frame_count
+            
+        if frame_count > self.max_frame :
+            self.max_frame = frame_count
+    
 
 if __name__ == '__main__':
     global a
